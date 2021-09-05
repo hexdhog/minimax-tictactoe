@@ -1,28 +1,46 @@
+from typing import (
+    Dict,
+    Any,
+    Callable
+)
+
 class Node:
-    def __init__(self, item: None, childs: list = []):
+    def __init__(self, item: Any = None, childs: Dict = {}):
         self.item = item
-        self.childs = []
+        self.childs = {}
         self.addChilds(childs)
 
-    def addChilds(self, childs: list):
-        for child in childs:
-            self.add(child)
+    # Add child nodes
+    #
+    # :param childs: child node dictionary
+    def addChilds(self, childs: Dict):
+        for key in childs:
+            self.add(key, childs[key])
 
-    def add(self, child):
-        if isinstance(child, Node):
-            self.childs.append(child)
-        else:
-            self.childs.append(Node(child))
+    # Add child node with key
+    # Already registered keys will be replaced
+    #
+    # :param key: node key
+    # :param child: child node
+    def add(self, key: Any, child: Any):
+        node = child
+        if not isinstance(node, Node):
+            node = Node(child)
+        self.childs[key] = node
 
-    def remove(self, child):
-        self.childs.remove(child)
+    # Remove child node
+    #
+    # :param key: child node key
+    def remove(self, key: Any):
+        if key in self.childs:
+            del self.childs[key]
 
-    def pop(self, index: int):
-        self.childs.pop(index)
-
-    def walk(self, function: None, depth: int = -1):
-        if function:
-            function(self, depth=depth)
+    # Walk through child nodes and their children
+    #
+    # :param function: function to execute for every node, including current node
+    # :param depth: number of layers to process (-1 for infinite)
+    def walk(self, function: Callable, depth: int = -1):
+        function(self, depth=depth)
         if depth != 0:
-            for child in self.childs:
-                child.walk(function, depth=depth - 1)
+            for key in self.childs:
+                self.childs[key].walk(funciton, depth=depth - 1)
